@@ -1,78 +1,74 @@
 #include <stdlib.h>
 #include <windows.h>
 
-void ShowLastError() {
-  DWORD err = GetLastError();
-  LPTSTR buf = NULL;
+// void ShowLastError() {
+//   DWORD err = GetLastError();
+//   LPTSTR buf = NULL;
+// 
+//   FormatMessage(
+//     FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM,
+//     NULL,
+//     err,
+//     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+//     (LPTSTR) &buf,
+//     0,
+//     NULL
+//   );
+// 
+//   MessageBox(NULL, buf, NULL, MB_ICONERROR | MB_OK);
+//   LocalFree(buf);
+// }
 
-  FormatMessage(
-    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM,
-    NULL,
-    err,
-    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-    (LPTSTR) &buf,
-    0,
-    NULL
-  );
 
-  MessageBox(NULL, buf, NULL, MB_ICONERROR | MB_OK);
-  LocalFree(buf);
+LRESULT CALLBACK WndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam) {
+  return DefWindowProc(hWnd, Message, wParam, lParam);
 }
 
-LRESULT Wndproc(
-  HWND unnamedParam1,
-  UINT unnamedParam2,
-  WPARAM unnamedParam3,
-  LPARAM unnamedParam4
-) {
-  return 0;
-}
-
-
-int main() {
-  HWND window;
-  WNDCLASS class = {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE phInstance, LPSTR CmdLine, int CmdShow) {
+  WNDCLASS wc = {
     .style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW,
-    .lpfnWndProc = Wndproc,
+    .lpfnWndProc = WndProc,
     .lpszClassName = "foddacitron",
-    .hInstance = GetModuleHandle(NULL),
-    .hCursor = LoadCursor(NULL, IDC_ARROW),
+    .hInstance = hInstance,
+    .hCursor = LoadCursor(hInstance, IDC_ARROW),
     .hIcon = LoadImage(
-       NULL, 
+       hInstance, 
       "assets/icon.ico",
       IMAGE_ICON, 
       0, 0, 
       LR_LOADFROMFILE
-    )
+    ),
   };
   
-  if (class.hIcon == NULL) {
+  if (wc.hIcon == NULL) {
     MessageBox(NULL, "Load image (for icon) failed.", NULL, MB_ICONERROR | MB_OK);
     return EXIT_FAILURE;
   }
 
-  if (RegisterClass(&class) == 0) {
+  if (!RegisterClass(&wc)) {
     MessageBox(NULL, "Register class failed.", NULL, MB_ICONERROR | MB_OK);
     return EXIT_FAILURE;
   }
 
-  window = CreateWindow(
-    "foddacitron",
+  HWND hwnd = CreateWindow(
+    wc.lpszClassName,
     "foddacitron",
     WS_OVERLAPPEDWINDOW,
     CW_USEDEFAULT, CW_USEDEFAULT,
     500,500,
     0,
     0,
-    class.hInstance,
+    hInstance,
     0
   );
 
-  if (window == NULL) {
-    ShowLastError();
+  if (hwnd == NULL) {
     MessageBox(NULL, "Create window failed.", NULL, MB_ICONERROR | MB_OK);
     return EXIT_FAILURE;
   }
+
+  DestroyWindow(hwnd);
+  UnregisterClass(wc.lpszClassName, wc.hInstance);
 
   return EXIT_SUCCESS;
 }
